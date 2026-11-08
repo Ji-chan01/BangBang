@@ -113,4 +113,20 @@ describe('EventBus', () => {
     expect(handler).toHaveBeenCalledTimes(2);
     expect(handler).toHaveBeenLastCalledWith({ count: 6 });
   });
+
+  it('should report correct listenerCount for an event', () => {
+    expect(EventBus.listenerCount('demo:spawn-shape')).toBe(0);
+
+    const unsub1 = EventBus.on('demo:spawn-shape', vi.fn());
+    expect(EventBus.listenerCount('demo:spawn-shape')).toBe(1);
+
+    const unsub2 = EventBus.on('demo:spawn-shape', vi.fn());
+    expect(EventBus.listenerCount('demo:spawn-shape')).toBe(2);
+
+    unsub1();
+    expect(EventBus.listenerCount('demo:spawn-shape')).toBe(1);
+
+    unsub2();
+    expect(EventBus.listenerCount('demo:spawn-shape')).toBe(0);
+  });
 });

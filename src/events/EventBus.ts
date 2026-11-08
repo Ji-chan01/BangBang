@@ -99,6 +99,14 @@ class TypedEventBus {
   clear(): void {
     this.handlers.clear();
   }
+
+  /**
+   * Returns the number of registered listeners for an event.
+   * Useful for unit tests and lifecycle verification.
+   */
+  listenerCount<E extends EventName>(event: E): number {
+    return this.handlers.get(event)?.size ?? 0;
+  }
 }
 
 /**
@@ -106,3 +114,8 @@ class TypedEventBus {
  * This is safe because there's only one browser tab running the game.
  */
 export const EventBus = new TypedEventBus();
+
+// In development, expose EventBus on window for manual verification in DevTools console
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  (window as unknown as { EventBus: typeof EventBus }).EventBus = EventBus;
+}

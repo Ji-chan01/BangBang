@@ -45,10 +45,20 @@ export class DemoScene extends Phaser.Scene {
       this.spawnShape(x, y);
     });
 
-    // Clean up when the scene is shut down without removing other subscribers
-    this.events.once('shutdown', () => {
+    // Cleanup on both SHUTDOWN and DESTROY:
+    // Phaser emits SHUTDOWN when a scene stops or restarts.
+    // However, game.destroy(true) (our React unmount path) emits DESTROY instead and never emits SHUTDOWN.
+    // Registering cleanup on both ensures listeners are detached regardless of how the scene exits.
+    // The boolean guard ensures calling cleanup twice is harmless.
+    let cleanedUp = false;
+    const cleanup = () => {
+      if (cleanedUp) return;
+      cleanedUp = true;
       unsubSpawn();
-    });
+    };
+
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, cleanup);
+    this.events.once(Phaser.Scenes.Events.DESTROY, cleanup);
 
     // ─── Handle tap/click directly on the Phaser canvas ───
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
