@@ -45,12 +45,5 @@ export function PhaserGame() {
     };
   }, []);
 
-  return (
-    <div
-      ref={containerRef}
-      id="phaser-container"
-      className="w-full h-full"
-    />
-  );
+  return <div ref={containerRef} id="phaser-container" className="w-full h-full" />;
 }
-

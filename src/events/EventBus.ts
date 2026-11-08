@@ -106,4 +106,3 @@ class TypedEventBus {
  * This is safe because there's only one browser tab running the game.
  */
 export const EventBus = new TypedEventBus();
-

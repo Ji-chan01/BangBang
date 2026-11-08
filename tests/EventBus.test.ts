@@ -114,4 +114,3 @@ describe('EventBus', () => {
     expect(handler).toHaveBeenLastCalledWith({ count: 6 });
   });
 });
-

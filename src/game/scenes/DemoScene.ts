@@ -21,24 +21,33 @@ export class DemoScene extends Phaser.Scene {
 
   create(): void {
     // ─── Draw a title ───
-    this.add.text(960 / 2, 40, '🎯 BangBang — Phase 1 Demo', {
-      fontSize: '24px',
-      color: '#ffffff',
-      fontFamily: 'system-ui, sans-serif',
-    }).setOrigin(0.5);
+    this.add
+      .text(960 / 2, 40, '🎯 BangBang — Phase 1 Demo', {
+        fontSize: '24px',
+        color: '#ffffff',
+        fontFamily: 'system-ui, sans-serif',
+      })
+      .setOrigin(0.5);
 
-    this.add.text(960 / 2, 75, 'Click/tap the canvas or press the React button to spawn shapes', {
-      fontSize: '14px',
-      color: '#aaccaa',
-      fontFamily: 'system-ui, sans-serif',
-    }).setOrigin(0.5);
+    this.add
+      .text(960 / 2, 75, 'Click/tap the canvas or press the React button to spawn shapes', {
+        fontSize: '14px',
+        color: '#aaccaa',
+        fontFamily: 'system-ui, sans-serif',
+      })
+      .setOrigin(0.5);
 
     // ─── Listen for React → Phaser event ───
     // When the React button emits 'demo:spawn-shape', we spawn a circle at a random position.
-    EventBus.on('demo:spawn-shape', () => {
+    const unsubSpawn = EventBus.on('demo:spawn-shape', () => {
       const x = Phaser.Math.Between(80, 880);
       const y = Phaser.Math.Between(120, 560);
       this.spawnShape(x, y);
+    });
+
+    // Clean up when the scene is shut down without removing other subscribers
+    this.events.once('shutdown', () => {
+      unsubSpawn();
     });
 
     // ─── Handle tap/click directly on the Phaser canvas ───
@@ -63,10 +72,7 @@ export class DemoScene extends Phaser.Scene {
     circle.setStrokeStyle(2, 0xffffff);
 
     // Make it interactive (clickable/tappable)
-    circle.setInteractive(
-      new Phaser.Geom.Circle(0, 0, 20),
-      Phaser.Geom.Circle.Contains
-    );
+    circle.setInteractive(new Phaser.Geom.Circle(0, 0, 20), Phaser.Geom.Circle.Contains);
 
     // When this specific circle is clicked, emit to React
     circle.on('pointerdown', () => {
@@ -121,17 +127,4 @@ export class DemoScene extends Phaser.Scene {
       }
     }
   }
-
-  /**
-   * Clean up EventBus listeners when the scene shuts down.
-   * Prevents memory leaks and stale handlers.
-   */
-  shutdown(): void {
-    EventBus.off('demo:spawn-shape');
-  }
-
-  destroy(): void {
-    this.shutdown();
-  }
 }
-

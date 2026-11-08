@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* ─── Design Tokens (Tailwind v4 CSS-first config) ─── */
 @theme {
@@ -38,7 +38,10 @@ body {
   touch-action: none;
   background-color: var(--color-game-bg);
   color: var(--color-game-text);
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
   -webkit-user-select: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;

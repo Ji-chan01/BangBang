@@ -27,9 +27,9 @@ export function createGameConfig(parent: HTMLElement): Phaser.Types.Core.GameCon
       },
     },
     scale: {
-      mode: Phaser.Scale.FIT,       // Scale to fit the container, maintaining aspect ratio
+      mode: Phaser.Scale.FIT, // Scale to fit the container, maintaining aspect ratio
       autoCenter: Phaser.Scale.CENTER_BOTH,
-      expandParent: false,           // Don't resize the parent div
+      expandParent: false, // Don't resize the parent div
     },
     scene: [BootScene, DemoScene],
     // Prevent right-click context menu on the game canvas
@@ -41,9 +41,8 @@ export function createGameConfig(parent: HTMLElement): Phaser.Types.Core.GameCon
     },
     // Render settings for crisp pixel art (when we add real sprites)
     render: {
-      pixelArt: false,   // Set to true if using pixel art style
+      pixelArt: false, // Set to true if using pixel art style
       antialias: true,
     },
   };
 }
-
