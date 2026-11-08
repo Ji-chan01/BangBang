@@ -191,7 +191,7 @@ export class GameScene extends Phaser.Scene {
     // 4. Check collisions
     const hits = checkCollisions(this.projectiles, this.allKids);
     for (const { projectile, hitKid } of hits) {
-      const result = applyDamage(hitKid, projectile.damage, hitKid.critChance, this.rng);
+      const result = applyDamage(hitKid, projectile.damage, projectile.isCritical);
       EventBus.emit('projectile:hit', {
         projectileId: projectile.id,
         targetId: hitKid.id,

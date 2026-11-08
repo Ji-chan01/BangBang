@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { applyDamage } from '../../src/simulation/systems/DamageSystem';
 import { Kid, resetKidIdCounter } from '../../src/simulation/Kid';
+import { createThrow } from '../../src/simulation/Throw';
+import { resetProjectileIdCounter } from '../../src/simulation/Projectile';
 import { SeededRandom } from '../../src/utils/random';
 import type { RoleStats } from '../../src/simulation/types';
 
@@ -19,15 +21,15 @@ const testStats: RoleStats = {
 describe('DamageSystem — applyDamage', () => {
   beforeEach(() => {
     resetKidIdCounter();
+    resetProjectileIdCounter();
   });
 
   // ─── Normal (non-crit) damage ─────────────────────────────────
 
   describe('normal damage (no crit)', () => {
-    it('deals baseDamage when critChance is 0', () => {
+    it('deals baseDamage when isCritical is false', () => {
       const kid = new Kid('team1', 'thrower', testStats, { x: 0, y: 0 });
-      const rng = new SeededRandom(42);
-      const result = applyDamage(kid, 30, 0, rng);
+      const result = applyDamage(kid, 30, false);
 
       expect(result.damageDealt).toBe(30);
       expect(result.isCritical).toBe(false);
@@ -39,8 +41,7 @@ describe('DamageSystem — applyDamage', () => {
 
     it('does not kill when partial damage', () => {
       const kid = new Kid('team1', 'thrower', testStats, { x: 0, y: 0 });
-      const rng = new SeededRandom(1);
-      const result = applyDamage(kid, 10, 0, rng);
+      const result = applyDamage(kid, 10, false);
       expect(result.newHp).toBe(70);
       expect(result.downed).toBe(false);
       expect(kid.state).toBe('idle');
@@ -50,10 +51,9 @@ describe('DamageSystem — applyDamage', () => {
   // ─── Critical damage ──────────────────────────────────────────
 
   describe('critical damage', () => {
-    it('deals 2x baseDamage when critChance is 1', () => {
+    it('deals 2x baseDamage when isCritical is true', () => {
       const kid = new Kid('team1', 'thrower', testStats, { x: 0, y: 0 });
-      const rng = new SeededRandom(42);
-      const result = applyDamage(kid, 20, 1, rng);
+      const result = applyDamage(kid, 20, true);
 
       expect(result.damageDealt).toBe(40); // 20 * 2
       expect(result.isCritical).toBe(true);
@@ -62,13 +62,64 @@ describe('DamageSystem — applyDamage', () => {
     });
   });
 
+  // ─── Thrower critChance vs Target critChance ──────────────────
+
+  describe('thrower critChance decides outcome (never target critChance)', () => {
+    it('deals critical damage when thrower has 100% crit even if target has 0% crit', () => {
+      const throwerStats: RoleStats = {
+        ...testStats,
+        critChance: 1.0, // 100% crit chance
+      };
+      const targetStats: RoleStats = {
+        ...testStats,
+        critChance: 0.0, // 0% crit chance
+      };
+
+      const thrower = new Kid('team1', 'thrower', throwerStats, { x: 100, y: 100 });
+      const target = new Kid('team2', 'thrower', targetStats, { x: 200, y: 100 });
+      const rng = new SeededRandom(42);
+
+      const proj = createThrow(thrower, target.position, rng, 40);
+      expect(proj).not.toBeNull();
+      expect(proj!.isCritical).toBe(true);
+
+      const result = applyDamage(target, proj!.damage, proj!.isCritical);
+      expect(result.isCritical).toBe(true);
+      expect(result.damageDealt).toBe(60); // 30 * 2
+      expect(target.hp).toBe(20); // 80 - 60
+    });
+
+    it('deals normal damage when thrower has 0% crit even if target has 100% crit', () => {
+      const throwerStats: RoleStats = {
+        ...testStats,
+        critChance: 0.0, // 0% crit chance
+      };
+      const targetStats: RoleStats = {
+        ...testStats,
+        critChance: 1.0, // 100% crit chance
+      };
+
+      const thrower = new Kid('team1', 'thrower', throwerStats, { x: 100, y: 100 });
+      const target = new Kid('team2', 'thrower', targetStats, { x: 200, y: 100 });
+      const rng = new SeededRandom(42);
+
+      const proj = createThrow(thrower, target.position, rng, 40);
+      expect(proj).not.toBeNull();
+      expect(proj!.isCritical).toBe(false);
+
+      const result = applyDamage(target, proj!.damage, proj!.isCritical);
+      expect(result.isCritical).toBe(false);
+      expect(result.damageDealt).toBe(30); // 30 * 1
+      expect(target.hp).toBe(50); // 80 - 30
+    });
+  });
+
   // ─── Damage that downs ────────────────────────────────────────
 
   describe('damage that downs a kid', () => {
     it('downs the kid when non-crit damage brings HP to 0', () => {
       const kid = new Kid('team1', 'thrower', testStats, { x: 0, y: 0 });
-      const rng = new SeededRandom(42);
-      const result = applyDamage(kid, 80, 0, rng);
+      const result = applyDamage(kid, 80, false);
 
       expect(result.damageDealt).toBe(80);
       expect(result.isCritical).toBe(false);
@@ -84,9 +135,8 @@ describe('DamageSystem — applyDamage', () => {
   describe('critical that kills outright', () => {
     it('kills outright when crit damage brings HP to 0', () => {
       const kid = new Kid('team1', 'thrower', testStats, { x: 0, y: 0 });
-      const rng = new SeededRandom(42);
       // 40 * 2 = 80 = maxHp, crit kill
-      const result = applyDamage(kid, 40, 1, rng);
+      const result = applyDamage(kid, 40, true);
 
       expect(result.damageDealt).toBe(80);
       expect(result.isCritical).toBe(true);
@@ -103,8 +153,7 @@ describe('DamageSystem — applyDamage', () => {
     it('deals 0 damage to a downed kid', () => {
       const kid = new Kid('team1', 'thrower', testStats, { x: 0, y: 0 });
       kid.takeDamage(80, false); // downed
-      const rng = new SeededRandom(42);
-      const result = applyDamage(kid, 30, 0, rng);
+      const result = applyDamage(kid, 30, false);
 
       expect(result.damageDealt).toBe(0);
       expect(result.isCritical).toBe(false);
@@ -116,8 +165,7 @@ describe('DamageSystem — applyDamage', () => {
     it('deals 0 damage to an out kid', () => {
       const kid = new Kid('team1', 'thrower', testStats, { x: 0, y: 0 });
       kid.takeDamage(80, true); // out
-      const rng = new SeededRandom(42);
-      const result = applyDamage(kid, 30, 1, rng);
+      const result = applyDamage(kid, 30, true);
 
       expect(result.damageDealt).toBe(0);
       expect(result.isCritical).toBe(false);
@@ -132,8 +180,7 @@ describe('DamageSystem — applyDamage', () => {
   describe('DamageResult fields are correct', () => {
     it('returns all expected fields for a surviving non-crit hit', () => {
       const kid = new Kid('team1', 'thrower', testStats, { x: 0, y: 0 });
-      const rng = new SeededRandom(99);
-      const result = applyDamage(kid, 25, 0, rng);
+      const result = applyDamage(kid, 25, false);
 
       expect(result).toEqual({
         damageDealt: 25,
@@ -146,8 +193,7 @@ describe('DamageSystem — applyDamage', () => {
 
     it('returns all expected fields for a crit that survives', () => {
       const kid = new Kid('team1', 'thrower', testStats, { x: 0, y: 0 });
-      const rng = new SeededRandom(99);
-      const result = applyDamage(kid, 10, 1, rng); // 10 * 2 = 20
+      const result = applyDamage(kid, 10, true); // 10 * 2 = 20
 
       expect(result).toEqual({
         damageDealt: 20,

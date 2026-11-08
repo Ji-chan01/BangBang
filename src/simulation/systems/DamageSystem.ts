@@ -12,24 +12,20 @@
  */
 
 import type { DamageResult } from '../types';
-import { Kid } from '../Kid';
-import { SeededRandom } from '../../utils/random';
+import type { Kid } from '../Kid';
 
 /**
  * Apply damage from a projectile hit.
  *
+ * Uses the projectile's `isCritical` flag (decided by the thrower's critChance
+ * at throw time) directly, without re-rolling against the target's stats.
+ *
  * @param target The kid being hit
  * @param baseDamage Raw damage from the projectile
- * @param critChance Probability of a critical hit (0–1)
- * @param rng Seeded random for determinism
+ * @param isCritical Whether the incoming projectile scored a critical hit
  * @returns The result of the damage application
  */
-export function applyDamage(
-  target: Kid,
-  baseDamage: number,
-  critChance: number,
-  rng: SeededRandom,
-): DamageResult {
+export function applyDamage(target: Kid, baseDamage: number, isCritical: boolean): DamageResult {
   if (!target.isActive) {
     return {
       damageDealt: 0,
@@ -40,9 +36,7 @@ export function applyDamage(
     };
   }
 
-  const isCritical = rng.chance(critChance);
   const damageDealt = isCritical ? baseDamage * 2 : baseDamage;
-
   const result = target.takeDamage(damageDealt, isCritical);
 
   return {
