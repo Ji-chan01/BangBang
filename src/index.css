@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+/* ─── Design Tokens (Tailwind v4 CSS-first config) ─── */
+@theme {
+  /* Team colors — easy to restyle */
+  --color-team-blue: #3b82f6;
+  --color-team-red: #ef4444;
+  --color-team-green: #22c55e;
+  --color-team-yellow: #eab308;
+  --color-team-purple: #a855f7;
+  --color-team-orange: #f97316;
+
+  /* Game UI palette */
+  --color-game-bg: #1a1a2e;
+  --color-game-surface: #16213e;
+  --color-game-accent: #0f3460;
+  --color-game-highlight: #e94560;
+  --color-game-text: #eaeaea;
+  --color-game-text-dim: #a0a0b0;
+
+  /* Spacing tokens for HUD elements */
+  --spacing-hud: 0.5rem;
+
+  /* Font sizes for touch-friendly UI */
+  --font-size-hud: 0.875rem;
+  --font-size-hud-lg: 1.125rem;
+}
+
+/* ─── Global resets for game ─── */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+  background-color: var(--color-game-bg);
+  color: var(--color-game-text);
+  font-family: system-ui, -apple-system, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
