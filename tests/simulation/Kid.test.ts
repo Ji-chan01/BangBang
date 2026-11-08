@@ -191,6 +191,14 @@ describe('Kid', () => {
       expect(kid.canThrow).toBe(false);
     });
 
+    it('update automatically finishes throw when throwTimer expires', () => {
+      const kid = new Kid('team1', 'thrower', testStats, spawnPos);
+      kid.startThrow();
+      expect(kid.state).toBe('throwing');
+      kid.update(Kid.THROW_DURATION, TILE_SIZE);
+      expect(kid.state).toBe('idle');
+    });
+
     it('canThrow becomes true after cooldown expires via update', () => {
       const kid = new Kid('team1', 'thrower', testStats, spawnPos);
       kid.startThrow();

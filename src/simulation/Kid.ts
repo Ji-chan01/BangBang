@@ -53,6 +53,12 @@ export class Kid {
   /** How long the downed window lasts (seconds). */
   static readonly DOWNED_WINDOW = 5;
 
+  /** Duration of the throwing state/animation (seconds). */
+  static readonly THROW_DURATION = 0.2;
+
+  /** Seconds remaining in the throwing state. */
+  throwTimer = 0;
+
   constructor(teamId: TeamId, role: RoleType, stats: RoleStats, spawnPos: Position) {
     this.id = `kid-${nextKidId++}`;
     this.teamId = teamId;
@@ -109,19 +115,21 @@ export class Kid {
 
   /**
    * Attempt to throw a snowball. Returns true if the throw was initiated.
-   * Decrements ammo and starts the reload cooldown.
+   * Decrements ammo and starts the reload cooldown and throw timer.
    */
   startThrow(): boolean {
     if (!this.canThrow) return false;
     this.ammo--;
     this.reloadCooldown = this.reloadTime;
+    this.throwTimer = Kid.THROW_DURATION;
     this.state = 'throwing';
     return true;
   }
 
-  /** Called after the throw animation completes to return to idle/moving. */
+  /** Called after the throw completes to return to idle/moving. */
   finishThrow(): void {
     if (this.state === 'throwing') {
+      this.throwTimer = 0;
       this.state = this.moveTarget ? 'moving' : 'idle';
     }
   }
@@ -185,6 +193,14 @@ export class Kid {
     // Tick reload cooldown
     if (this.reloadCooldown > 0) {
       this.reloadCooldown = Math.max(0, this.reloadCooldown - dt);
+    }
+
+    // Handle throwing timer (simulation-driven throw state)
+    if (this.state === 'throwing') {
+      this.throwTimer -= dt;
+      if (this.throwTimer <= 0) {
+        this.finishThrow();
+      }
     }
 
     // Handle downed timer

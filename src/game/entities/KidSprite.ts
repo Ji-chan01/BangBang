@@ -33,7 +33,7 @@ export class KidSprite extends Phaser.GameObjects.Container {
   /** Reference to the simulation Kid this sprite represents. */
   readonly kid: Kid;
 
-  private body: Phaser.GameObjects.Arc;
+  private bodyCircle: Phaser.GameObjects.Arc;
   private hpBarBg: Phaser.GameObjects.Rectangle;
   private hpBarFill: Phaser.GameObjects.Rectangle;
   private roleLabel: Phaser.GameObjects.Text;
@@ -48,8 +48,8 @@ export class KidSprite extends Phaser.GameObjects.Container {
 
     // Team-colored body circle
     const teamColor = TEAM_COLORS[kid.teamId] ?? 0xaaaaaa;
-    this.body = scene.add.circle(0, 0, BODY_RADIUS, teamColor);
-    this.add(this.body);
+    this.bodyCircle = scene.add.circle(0, 0, BODY_RADIUS, teamColor);
+    this.add(this.bodyCircle);
 
     // Selection ring (slightly larger, shown when player controls this kid)
     this.selectionRing = scene.add.circle(0, 0, BODY_RADIUS + 4);
@@ -124,7 +124,7 @@ export class KidSprite extends Phaser.GameObjects.Container {
     // State-based visual changes
     switch (kid.state) {
       case 'downed':
-        this.body.setAlpha(0.5);
+        this.bodyCircle.setAlpha(0.5);
         this.roleLabel.setText('X');
         break;
       case 'out':
@@ -132,11 +132,11 @@ export class KidSprite extends Phaser.GameObjects.Container {
         break;
       case 'throwing':
         // Brief squash effect (scale up slightly)
-        this.body.setScale(1.15);
+        this.bodyCircle.setScale(1.15);
         break;
       default:
-        this.body.setAlpha(1);
-        this.body.setScale(1);
+        this.bodyCircle.setAlpha(1);
+        this.bodyCircle.setScale(1);
         this.roleLabel.setText(kid.role === 'thrower' ? 'T' : kid.role === 'runner' ? 'R' : 'B');
         break;
     }

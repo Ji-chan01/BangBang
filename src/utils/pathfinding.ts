@@ -29,6 +29,10 @@ export class Pathfinder {
    * Returns an array of tile positions (empty if no path found).
    */
   findPath(start: TilePosition, end: TilePosition): Promise<TilePosition[]> {
+    if (start.col === end.col && start.row === end.row) {
+      return Promise.resolve([start]);
+    }
+
     return new Promise((resolve) => {
       this.easystar.findPath(start.col, start.row, end.col, end.row, (path) => {
         if (path === null) {

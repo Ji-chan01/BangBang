@@ -28,6 +28,7 @@ import { checkCollisions } from '../../simulation/systems/CollisionSystem';
 import { applyDamage } from '../../simulation/systems/DamageSystem';
 import { updateProjectiles } from '../../simulation/systems/ProjectileSystem';
 import { tryPickupAmmo } from '../../simulation/systems/AmmoSystem';
+import { createThrow } from '../../simulation/Throw';
 import { Pathfinder } from '../../utils/pathfinding';
 import { SeededRandom } from '../../utils/random';
 import { distance, worldToTile } from '../../utils/math';
@@ -374,50 +375,19 @@ export class GameScene extends Phaser.Scene {
    * Handle throwing a snowball at an enemy kid.
    */
   private handleThrowAtTarget(target: Kid): void {
-    const thrower = this.activeKid;
-    if (!thrower.canThrow) return;
     if (!target.isActive) return;
 
-    // Check range (throwRange is in tiles, convert to pixels)
-    const throwRangePx = thrower.throwRange * this.arena.tileSize;
-    const dist = distance(thrower.position, target.position);
-    if (dist > throwRangePx) return; // Out of range
+    const proj = createThrow(this.activeKid, target.position, this.rng, this.arena.tileSize);
+    if (!proj) return;
 
-    // Initiate throw
-    if (!thrower.startThrow()) return;
-
-    // Determine if this is a critical hit
-    const isCritical = this.rng.chance(thrower.critChance);
-
-    // Apply accuracy: offset the target position slightly
-    const spread = (1 - thrower.accuracy) * 40; // Max pixel offset
-    const targetPos: Position = {
-      x: target.position.x + this.rng.float(-spread, spread),
-      y: target.position.y + this.rng.float(-spread, spread),
-    };
-
-    // Create projectile
-    const proj = new Projectile(
-      thrower.id,
-      thrower.teamId,
-      { ...thrower.position },
-      targetPos,
-      thrower.throwDamage,
-      isCritical,
-    );
     this.projectiles.push(proj);
     this.createSnowballSprite(proj);
 
     // Update ammo HUD
     EventBus.emit('kid:ammo-changed', {
-      kidId: thrower.id,
-      ammo: thrower.ammo,
-      maxAmmo: thrower.maxAmmo,
-    });
-
-    // Return to idle/moving after a brief delay (simulates throw animation)
-    this.time.delayedCall(200, () => {
-      thrower.finishThrow();
+      kidId: this.activeKid.id,
+      ammo: this.activeKid.ammo,
+      maxAmmo: this.activeKid.maxAmmo,
     });
   }
 
@@ -451,36 +421,12 @@ export class GameScene extends Phaser.Scene {
 
       if (!nearestPlayer) continue;
 
-      // Check range
-      const throwRangePx = ai.kid.throwRange * this.arena.tileSize;
-      if (nearestDist > throwRangePx) continue;
+      // Throw at target using pure simulation logic
+      const proj = createThrow(ai.kid, nearestPlayer.position, this.rng, this.arena.tileSize);
+      if (!proj) continue;
 
-      // Throw!
-      if (!ai.kid.canThrow) continue;
-      ai.kid.startThrow();
-
-      const isCritical = this.rng.chance(ai.kid.critChance);
-      const spread = (1 - ai.kid.accuracy) * 40;
-      const targetPos: Position = {
-        x: nearestPlayer.position.x + this.rng.float(-spread, spread),
-        y: nearestPlayer.position.y + this.rng.float(-spread, spread),
-      };
-
-      const proj = new Projectile(
-        ai.kid.id,
-        ai.kid.teamId,
-        { ...ai.kid.position },
-        targetPos,
-        ai.kid.throwDamage,
-        isCritical,
-      );
       this.projectiles.push(proj);
       this.createSnowballSprite(proj);
-
-      // Finish throw after delay
-      this.time.delayedCall(200, () => {
-        ai.kid.finishThrow();
-      });
     }
   }
 
