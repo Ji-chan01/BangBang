@@ -1,0 +1,36 @@
+{
+  "thrower": {
+    "role": "thrower",
+    "hp": 80,
+    "speed": 60,
+    "throwRange": 12,
+    "throwDamage": 30,
+    "reloadTime": 0.8,
+    "accuracy": 0.92,
+    "maxAmmo": 8,
+    "critChance": 0.1
+  },
+  "runner": {
+    "role": "runner",
+    "hp": 70,
+    "speed": 150,
+    "throwRange": 5,
+    "throwDamage": 15,
+    "reloadTime": 1.5,
+    "accuracy": 0.6,
+    "maxAmmo": 4,
+    "critChance": 0.05
+  },
+  "builder": {
+    "role": "builder",
+    "hp": 120,
+    "speed": 90,
+    "throwRange": 3,
+    "throwDamage": 10,
+    "reloadTime": 2.5,
+    "accuracy": 0.4,
+    "maxAmmo": 3,
+    "critChance": 0.03
+  }
+}
+

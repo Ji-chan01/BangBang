@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene';
 import { DemoScene } from './scenes/DemoScene';
+import { GameScene } from './scenes/GameScene';
 
 /**
  * Creates the Phaser game configuration.
@@ -31,7 +32,7 @@ export function createGameConfig(parent: HTMLElement): Phaser.Types.Core.GameCon
       autoCenter: Phaser.Scale.CENTER_BOTH,
       expandParent: false, // Don't resize the parent div
     },
-    scene: [BootScene, DemoScene],
+    scene: [BootScene, DemoScene, GameScene],
     // Prevent right-click context menu on the game canvas
     disableContextMenu: true,
     // Enable touch input

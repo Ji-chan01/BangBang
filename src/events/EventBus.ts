@@ -34,6 +34,31 @@ export interface EventMap {
   /** Phaser tells React the game is over */
   'game:over': { won: boolean; level: number };
 
+  // ─── Phase 2: Game events (Phaser → React HUD updates) ───
+  /** Player kid's HP changed */
+  'kid:hp-changed': { kidId: string; hp: number; maxHp: number };
+  /** Player kid's ammo changed */
+  'kid:ammo-changed': { kidId: string; ammo: number; maxAmmo: number };
+  /** A kid's state changed (idle, moving, throwing, downed, out) */
+  'kid:state-changed': { kidId: string; state: string };
+  /** A kid was downed */
+  'kid:downed': { kidId: string; teamId: string };
+  /** A kid went out (eliminated) */
+  'kid:out': { kidId: string; teamId: string };
+  /** A projectile hit a kid */
+  'projectile:hit': {
+    projectileId: string;
+    targetId: string;
+    damage: number;
+    isCritical: boolean;
+  };
+  /** A snow pile was depleted */
+  'snowpile:depleted': { pileId: string };
+  /** Ammo was picked up from a pile */
+  'ammo:pickup': { kidId: string; amount: number };
+  /** Round ended */
+  'round:end': { winnerTeam: string };
+
   // ─── Demo events (Phase 1 proof-of-concept) ───
   /** React button click triggers Phaser to spawn a shape */
   'demo:spawn-shape': undefined;

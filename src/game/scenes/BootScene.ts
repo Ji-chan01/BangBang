@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 
 /**
  * BootScene — The first scene that runs. Handles initial setup
- * and transitions to the demo scene.
+ * and transitions to the game scene.
  *
  * In later phases, this will load assets and show a loading bar,
  * then transition to PreloadScene → GameScene.
@@ -24,9 +24,10 @@ export class BootScene extends Phaser.Scene {
 
   /**
    * `create` runs once after preload completes.
-   * We immediately start the DemoScene.
+   * Start the GameScene (Phase 2+). DemoScene is still available
+   * in the scene list for testing if needed.
    */
   create(): void {
-    this.scene.start('DemoScene');
+    this.scene.start('GameScene');
   }
 }

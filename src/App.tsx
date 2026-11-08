@@ -1,6 +1,6 @@
 import { PhaserGame } from './game/PhaserGame';
 import { RotateOverlay } from './components/overlays/RotateOverlay';
-import { DemoPanel } from './components/demo/DemoPanel';
+import { GameHud } from './components/hud/GameHud';
 
 /**
  * App — Root React component.
@@ -21,8 +21,8 @@ export default function App() {
       {/* Game canvas — fills the entire container */}
       <PhaserGame />
 
-      {/* React UI layers on top of the canvas */}
-      <DemoPanel />
+      {/* React HUD layer on top of the canvas */}
+      <GameHud />
 
       {/* Portrait rotation overlay — highest z-index, blocks everything */}
       <RotateOverlay />
